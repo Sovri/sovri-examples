@@ -1,0 +1,8 @@
+# Sibling repositories fetched by the acceptance suite are never committed.
+/repos
+# Never commit secrets or local credentials.
+.env
+.env.*
+!.env.*.example
+*.pem
+*.key
