@@ -27,7 +27,7 @@ for d in "$AGENT" "$SDK" "$FW"; do
 done
 
 tmpd="$(mktemp -d)"
-cleanup() { rm -rf "$tmpd"; }
+cleanup() { [ -n "${tmpd:-}" ] && rm -rf "$tmpd"; }
 trap cleanup EXIT
 
 echo "== R-01: documented build/test/lint commands per repository =="

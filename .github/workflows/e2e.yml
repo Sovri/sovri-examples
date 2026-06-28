@@ -33,6 +33,7 @@ jobs:
           components: rustfmt, clippy
       - name: Fetch sibling repositories
         run: |
+          set -euo pipefail
           mkdir -p repos
           for r in sovri-agent sovri-sdk-rust sovri-frameworks; do
             git clone --depth 1 "https://github.com/Sovri/$r.git" "repos/$r"
