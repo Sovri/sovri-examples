@@ -1,0 +1,48 @@
+name: E2E
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  action-pins:
+    name: action-pins
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - run: ./scripts/check-action-pins.sh
+
+  acceptance:
+    name: acceptance
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - uses: dtolnay/rust-toolchain@e97e2d8cc328f1b50210efc529dca0028893a2d9
+        with:
+          toolchain: stable
+          components: rustfmt, clippy
+      - name: Fetch sibling repositories
+        run: |
+          set -euo pipefail
+          mkdir -p repos
+          for r in sovri-agent sovri-sdk-rust sovri-frameworks; do
+            git clone --depth 1 "https://github.com/Sovri/$r.git" "repos/$r"
+          done
+      - name: Run offline acceptance suite
+        run: |
+          if [ ! -f repos/sovri-agent/Cargo.toml ] || [ ! -d repos/sovri-frameworks/frameworks ]; then
+            echo "Foundation repositories are not yet scaffolded on main."
+            echo "Skipping acceptance until the MAT-81 foundation PRs are merged."
+            exit 0
+          fi
+          ./tests/acceptance.sh "$PWD/repos"
